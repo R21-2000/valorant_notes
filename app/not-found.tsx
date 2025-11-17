@@ -1,4 +1,5 @@
-// /app/not-found.tsx
+//535240192 - Rakhafian Anargya Firdaus 
+
 import Link from 'next/link';
 
 export default function NotFound() {

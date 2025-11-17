@@ -1,23 +1,17 @@
-// /app/strategi/[id]/page.tsx
-//535240192 - Rakhafian Anargya Firdaus (MODIFIED to Server Component)
-
-// HAPUS "use client", useState, useEffect, useParams
-
-import { prisma } from '@/lib/prisma'; // Ambil data langsung dari DB
+//535240192 - Rakhafian Anargya Firdaus 
+import { prisma } from '@/lib/prisma'; 
 import Link from 'next/link';
-import { notFound } from 'next/navigation'; // Untuk 404
+import { notFound } from 'next/navigation'; 
 
 interface Params {
   params: { id: string };
 }
 
-// Fungsi ambil data langsung dari database
 async function getStrategy(id: string) {
   const strategy = await prisma.strategy.findUnique({
     where: { id: id },
   });
 
-  // Jika data tidak ada, lempar ke halaman 404 (Soal 5.a)
   if (!strategy) {
     notFound();
   }
@@ -39,7 +33,6 @@ export default async function StrategiDetailPage({ params }: Params) {
             {strategy.description || <em>Deskripsinya gaada.</em>}
           </p>
 
-          {/* Tambah tombol Edit juga di sini */}
           <div className="d-flex gap-2">
             <Link href="/strategi" className="btn btn-secondary">
               Kembali ke List

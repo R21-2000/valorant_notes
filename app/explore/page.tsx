@@ -1,8 +1,7 @@
-// /app/explore/page.tsx
+//535240192 - Rakhafian Anargya Firdaus 
 import Link from "next/link";
 import Image from "next/image";
 
-// Tipe data sesuai API FreeToGame
 interface Game {
   id: number;
   title: string;
@@ -12,19 +11,20 @@ interface Game {
   platform: string;
 }
 
-// Fungsi untuk ambil data
 async function getShooterGames() {
   try {
-    // Ambil data dari API, cache selama 1 jam
     const res = await fetch('https://www.freetogame.com/api/games?category=shooter', {
-      next: { revalidate: 3600 } 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     if (!res.ok) throw new Error('Gagal fetch');
     const data: Game[] = await res.json();
     return data;
   } catch (error) {
     console.error(error);
-    return []; // Kembalikan array kosong jika gagal
+    return [];
   }
 }
 

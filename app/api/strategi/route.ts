@@ -1,12 +1,11 @@
-// /app/api/strategi/route.ts
+//535240192 - Rakhafian Anargya Firdaus 
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-// --- GET (Read All) ---
 export async function GET() {
   try {
     const strategies = await prisma.strategy.findMany({
-      orderBy: { createdAt: 'desc' }, // Tampilkan yang terbaru di atas
+      orderBy: { createdAt: 'desc' }, 
     });
     return NextResponse.json(strategies);
   } catch (error) {
@@ -17,12 +16,10 @@ export async function GET() {
   }
 }
 
-// --- POST (Create) ---
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Validasi sederhana
     if (!body.map || !body.title) {
         return NextResponse.json({ error: 'Map dan Title wajib diisi'}, { status: 400 });
     }

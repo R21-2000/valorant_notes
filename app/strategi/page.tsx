@@ -1,17 +1,14 @@
-// /app/strategi/page.tsx
-//535240192 - Rakhafian Anargya Firdaus (MODIFIED)
+//535240192 - Rakhafian Anargya Firdaus 
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-// HAPUS import uuidv4, ID akan dibuat oleh database
 
-// Nentuin tipe data (sesuaikan dengan Prisma)
 interface Strategy {
   id: string;
   map: string;
   title: string;
-  description: string | null; // Sesuaikan, boleh null
+  description: string | null; 
 }
 
 export default function StrategiPage() {
@@ -19,10 +16,7 @@ export default function StrategiPage() {
   const [mapInput, setMapInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
   const [descInput, setDescInput] = useState('');
-  const [loading, setLoading] = useState(true); // Tambah state loading
-
-  // --- (Load) ---
-  // Ganti useEffect untuk load data dari API, bukan localStorage
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetchStrategi();
   }, []);
@@ -30,7 +24,7 @@ export default function StrategiPage() {
   const fetchStrategi = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/strategi'); // Panggil API kamu
+      const res = await fetch('/api/strategi'); 
       const data = await res.json();
       setStrategiList(data);
     } catch (error) {
@@ -39,10 +33,6 @@ export default function StrategiPage() {
       setLoading(false);
     }
   };
-
-  // --- HAPUS 'useEffect' untuk (Save) ke localStorage ---
-
-  // --- Ubah Tambah Strategi (POST ke API) ---
   const handleAddStrategy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mapInput || !titleInput) {
@@ -64,7 +54,7 @@ export default function StrategiPage() {
       if (!res.ok) throw new Error('Gagal menambah');
 
       const newStrategy = await res.json();
-      setStrategiList([newStrategy, ...strategiList]); // Tambah ke list
+      setStrategiList([newStrategy, ...strategiList]);
 
       // Reset form
       setMapInput('');
@@ -74,8 +64,6 @@ export default function StrategiPage() {
       alert('Gagal menambah strategi baru');
     }
   };
-
-  // --- Ubah Delete Strategi (DELETE ke API) ---
   const handleDelete = async (id: string) => {
     if (!confirm('Yakin mau hapus strategi ini?')) return;
 
@@ -96,13 +84,11 @@ export default function StrategiPage() {
   return (
     <div className="container mt-5">
       <div className="row">
-        {/* Bootstrap Form (HTML tidak berubah) */}
         <div className="col-md-4">
           <div className="card">
             <div className="card-body">
               <h5 className="card-title">Tambah Strategi Baru</h5>
               <form onSubmit={handleAddStrategy}>
-                {/* ... (semua input form kamu tetap sama) ... */}
                 <div className="mb-3">
                   <label htmlFor="map" className="form-label">Nama Map</label>
                   <input type="text" className="form-control" id="map" value={mapInput} onChange={(e) => setMapInput(e.target.value)} />
@@ -120,8 +106,6 @@ export default function StrategiPage() {
             </div>
           </div>
         </div>
-
-        {/* Nampilin List (TAMBAH TOMBOL EDIT) */}
         <div className="col-md-8">
           <h2>Daftar Strategi</h2>
           {loading ? (
@@ -139,7 +123,6 @@ export default function StrategiPage() {
                     </div>
                   </Link>
                   <div className="d-flex gap-2">
-                    {/* --- TOMBOL EDIT BARU (Soal 4.c) --- */}
                     <Link href={`/strategi/edit/${item.id}`} className="btn btn-warning btn-sm">
                       Edit
                     </Link>

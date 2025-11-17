@@ -1,4 +1,5 @@
-// /app/strategi/edit/[id]/page.tsx
+//535240192 - Rakhafian Anargya Firdaus 
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,11 +11,10 @@ export default function EditStrategiPage() {
   const [descInput, setDescInput] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const params = useParams(); // Ambil [id] dari URL
-  const router = useRouter(); // Untuk navigasi
+  const params = useParams(); 
+  const router = useRouter(); 
   const id = params.id as string;
 
-  // 1. Ambil data lama untuk ditampilkan di form
   useEffect(() => {
     if (id) {
       fetch(`/api/strategi/${id}`)
@@ -22,14 +22,13 @@ export default function EditStrategiPage() {
         .then((data) => {
           setMapInput(data.map);
           setTitleInput(data.title);
-          setDescInput(data.description || ''); // Handle jika null
+          setDescInput(data.description || ''); 
           setLoading(false);
         })
         .catch(() => alert('Gagal ambil data'));
     }
   }, [id]);
 
-  // 2. Kirim data yang sudah diubah (PUT)
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mapInput || !titleInput) {
@@ -50,7 +49,7 @@ export default function EditStrategiPage() {
       if (!res.ok) throw new Error('Gagal update');
 
       alert('Strategi berhasil di-update!');
-      router.push('/strategi'); // Balik ke halaman list
+      router.push('/strategi'); 
     } catch (error) {
       alert('Gagal update strategi');
     }

@@ -1,4 +1,4 @@
-// /app/api/strategi/[id]/route.ts
+//535240192 - Rakhafian Anargya Firdaus 
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -6,7 +6,6 @@ interface Params {
   params: { id: string };
 }
 
-// FUNGSI GET (Kamu mungkin perlu ini juga)
 export async function GET(request: Request, { params }: Params) {
   try {
     const strategy = await prisma.strategy.findUnique({
@@ -17,17 +16,16 @@ export async function GET(request: Request, { params }: Params) {
     }
     return NextResponse.json(strategy);
   } catch (error) {
-    console.error("GET [id] Error:", error); // <-- TAMBAHKAN INI
+    console.error("GET [id] Error:", error); 
     return NextResponse.json({ error: 'Gagal mengambil data' }, { status: 500 });
   }
 }
 
-// FUNGSI PUT (Update/Edit data by ID)
-export async function PUT(request: Request, { params }: Params) { // <-- TAMBAH { }
+export async function PUT(request: Request, { params }: Params) { 
   try {
     const body = await request.json();
     const updatedStrategy = await prisma.strategy.update({
-      where: { id: params.id }, // <-- Ini akan berhasil
+      where: { id: params.id }, 
       data: {
         map: body.map,
         title: body.title,
@@ -41,11 +39,10 @@ export async function PUT(request: Request, { params }: Params) { // <-- TAMBAH 
   }
 }
 
-// FUNGSI DELETE (Hapus data by ID)
-export async function DELETE(request: Request, { params }: Params) { // <-- TAMBAH { }
+export async function DELETE(request: Request, { params }: Params) { 
   try {
     await prisma.strategy.delete({
-      where: { id: params.id }, // <-- Ini akan berhasil
+      where: { id: params.id }, 
     });
     return NextResponse.json({ message: 'Data berhasil dihapus' });
   } catch (error) {
