@@ -1,58 +1,32 @@
-//535240192 - Rakhafian Anargya Firdaus
-"use client";
+// /app/strategi/[id]/page.tsx
+//535240192 - Rakhafian Anargya Firdaus (MODIFIED to Server Component)
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+// HAPUS "use client", useState, useEffect, useParams
+
+import { prisma } from '@/lib/prisma'; // Ambil data langsung dari DB
 import Link from 'next/link';
+import { notFound } from 'next/navigation'; // Untuk 404
 
-interface Strategy {
-  id: string;
-  map: string;
-  title: string;
-  description: string;
+interface Params {
+  params: { id: string };
 }
 
-export default function StrategiDetailPage() {
-  const params = useParams(); 
-  const id = params.id as string; 
+// Fungsi ambil data langsung dari database
+async function getStrategy(id: string) {
+  const strategy = await prisma.strategy.findUnique({
+    where: { id: id },
+  });
 
-  const [strategy, setStrategy] = useState<Strategy | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (id) {
-      // Load data dari localStorage
-      const storedData = localStorage.getItem('valorantStrategies');
-      if (storedData) {
-        const strategiList: Strategy[] = JSON.parse(storedData);
-        // Cari strategi yang ID-nya cocok
-        const foundStrategy = strategiList.find(item => item.id === id);
-        
-        if (foundStrategy) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-          setStrategy(foundStrategy);
-        }
-      }
-      setLoading(false);
-    }
-  }, [id]); // Jalan setiap kali id nya berubah
-
-  if (loading) {
-    return <div className="container mt-5"><p>Loading...</p></div>;
-  }
-
+  // Jika data tidak ada, lempar ke halaman 404 (Soal 5.a)
   if (!strategy) {
-    return (
-      <div className="container mt-5">
-        <p>Strategi tidak ditemukan.</p>
-        <Link href="/strategi" className="btn btn-secondary">
-          Kembali ke List
-        </Link>
-      </div>
-    );
+    notFound();
   }
+  return strategy;
+}
 
-  // --- Nampilin isi strateginya ---
+export default async function StrategiDetailPage({ params }: Params) {
+  const strategy = await getStrategy(params.id);
+
   return (
     <div className="container mt-5">
       <div className="card">
@@ -64,11 +38,19 @@ export default function StrategiDetailPage() {
           <p className="card-text">
             {strategy.description || <em>Deskripsinya gaada.</em>}
           </p>
-          
-          {/* --- Tombol back ke page utama --- */}
-          <Link href="/strategi" className="btn btn-secondary">
-            Kembali ke List
-          </Link>
+
+          {/* Tambah tombol Edit juga di sini */}
+          <div className="d-flex gap-2">
+            <Link href="/strategi" className="btn btn-secondary">
+              Kembali ke List
+            </Link>
+            <Link href={`/strategi/edit/${strategy.id}`} className="btn btn-warning">
+              Edit
+            </Link>
+          </div>
+        </div>
+        <div className="card-footer text-muted">
+          Dibuat: {strategy.createdAt.toLocaleString()}
         </div>
       </div>
     </div>

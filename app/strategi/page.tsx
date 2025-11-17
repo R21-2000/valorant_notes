@@ -1,16 +1,17 @@
-//535240192 - Rakhafian Anargya Firdaus
+// /app/strategi/page.tsx
+//535240192 - Rakhafian Anargya Firdaus (MODIFIED)
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { v4 as uuidv4 } from 'uuid'; 
+// HAPUS import uuidv4, ID akan dibuat oleh database
 
-// Nentuin tipe data dari si entitas strategi ini
+// Nentuin tipe data (sesuaikan dengan Prisma)
 interface Strategy {
   id: string;
   map: string;
   title: string;
-  description: string;
+  description: string | null; // Sesuaikan, boleh null
 }
 
 export default function StrategiPage() {
@@ -18,128 +19,137 @@ export default function StrategiPage() {
   const [mapInput, setMapInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
   const [descInput, setDescInput] = useState('');
+  const [loading, setLoading] = useState(true); // Tambah state loading
 
   // --- (Load) ---
-  // Pake useEffect buat load data dari localStorage pas komponen render
+  // Ganti useEffect untuk load data dari API, bukan localStorage
   useEffect(() => {
-    const storedData = localStorage.getItem('valorantStrategies');
-    if (storedData) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-      setStrategiList(JSON.parse(storedData));
-    }
-  }, []); // Array dependensi kosong, cuman jalan pas pertama kali di load
+    fetchStrategi();
+  }, []);
 
-  // --- (Save) ---
-  // pake useEffect lagi buat nyimpen data ke localStorage tiap kalo si entitas strategi update
-  useEffect(() => {
-    if (strategiList.length > 0) {
-      localStorage.setItem('valorantStrategies', JSON.stringify(strategiList));
+  const fetchStrategi = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/strategi'); // Panggil API kamu
+      const data = await res.json();
+      setStrategiList(data);
+    } catch (error) {
+      alert('Gagal memuat data');
+    } finally {
+      setLoading(false);
     }
-  }, [strategiList]); // Refresh tiap kali si strategi di update
+  };
 
-  // --- Tambah Strategi ---
-  const handleAddStrategy = (e: React.FormEvent) => {
+  // --- HAPUS 'useEffect' untuk (Save) ke localStorage ---
+
+  // --- Ubah Tambah Strategi (POST ke API) ---
+  const handleAddStrategy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mapInput || !titleInput) {
       alert('Map sama Judul harus ada, yakali kosong :I');
       return;
     }
-    
-    const newStrategy: Strategy = {
-      id: uuidv4(), // generate id unik buat tiap strategi
-      map: mapInput,
-      title: titleInput,
-      description: descInput,
-    };
 
-    setStrategiList([...strategiList, newStrategy]);
+    try {
+      const res = await fetch('/api/strategi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          map: mapInput,
+          title: titleInput,
+          description: descInput,
+        }),
+      });
 
-    // Reset form buat input lagi
-    setMapInput('');
-    setTitleInput('');
-    setDescInput('');
+      if (!res.ok) throw new Error('Gagal menambah');
+
+      const newStrategy = await res.json();
+      setStrategiList([newStrategy, ...strategiList]); // Tambah ke list
+
+      // Reset form
+      setMapInput('');
+      setTitleInput('');
+      setDescInput('');
+    } catch (error) {
+      alert('Gagal menambah strategi baru');
+    }
   };
 
-  // --- Delete Strategi ---
-  const handleDelete = (id: string) => {
-    // Filter list buat nyisain item yang id nya beda dengan id yang mau diapus
-    const updatedList = strategiList.filter(item => item.id !== id);
-    setStrategiList(updatedList);
-    
-    // Habis apus di list, hapus juga di localStoragenya 
-    if (updatedList.length === 0) {
-        localStorage.removeItem('valorantStrategies');
+  // --- Ubah Delete Strategi (DELETE ke API) ---
+  const handleDelete = async (id: string) => {
+    if (!confirm('Yakin mau hapus strategi ini?')) return;
+
+    try {
+      const res = await fetch(`/api/strategi/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Gagal menghapus');
+
+      // Filter list di UI
+      setStrategiList(strategiList.filter(item => item.id !== id));
+    } catch (error) {
+      alert('Gagal menghapus strategi');
     }
   };
 
   return (
     <div className="container mt-5">
       <div className="row">
-        {/* Bootstrap Form */}
+        {/* Bootstrap Form (HTML tidak berubah) */}
         <div className="col-md-4">
           <div className="card">
             <div className="card-body">
               <h5 className="card-title">Tambah Strategi Baru</h5>
               <form onSubmit={handleAddStrategy}>
+                {/* ... (semua input form kamu tetap sama) ... */}
                 <div className="mb-3">
                   <label htmlFor="map" className="form-label">Nama Map</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="map"
-                    value={mapInput}
-                    onChange={(e) => setMapInput(e.target.value)}
-                  />
+                  <input type="text" className="form-control" id="map" value={mapInput} onChange={(e) => setMapInput(e.target.value)} />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="title" className="form-label">Judul Strategi</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="title"
-                    value={titleInput}
-                    onChange={(e) => setTitleInput(e.target.value)}
-                  />
+                  <input type="text" className="form-control" id="title" value={titleInput} onChange={(e) => setTitleInput(e.target.value)} />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="desc" className="form-label">Deskripsi Strategi, kalo bisa rinci banget</label>
-                  <textarea
-                    className="form-control"
-                    id="desc"
-                    rows={3}
-                    value={descInput}
-                    onChange={(e) => setDescInput(e.target.value)}
-                  ></textarea>
+                  <label htmlFor="desc" className="form-label">Deskripsi Strategi</label>
+                  <textarea className="form-control" id="desc" rows={3} value={descInput} onChange={(e) => setDescInput(e.target.value)}></textarea>
                 </div>
-                <button type="submit" className="btn btn-primary w-100">
-                  Tambah
-                </button>
+                <button type="submit" className="btn btn-primary w-100">Tambah</button>
               </form>
             </div>
           </div>
         </div>
 
-        {/* Nampilin List */}
+        {/* Nampilin List (TAMBAH TOMBOL EDIT) */}
         <div className="col-md-8">
           <h2>Daftar Strategi</h2>
-          {strategiList.length === 0 ? (
+          {loading ? (
+            <p>Loading...</p>
+          ) : strategiList.length === 0 ? (
             <p>Masih kosong sih.</p>
           ) : (
             <div className="list-group">
               {strategiList.map((item) => (
                 <div key={item.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                  <Link href={`/strategi/${item.id}`} className="text-decoration-none text-dark w-100">
+                  <Link href={`/strategi/${item.id}`} className="text-decoration-none text-dark w-100 me-3">
                     <div className="flex-fill">
                       <h6 className="mb-1">{item.title}</h6>
                       <small className="text-muted">{item.map}</small>
                     </div>
                   </Link>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="d-flex gap-2">
+                    {/* --- TOMBOL EDIT BARU (Soal 4.c) --- */}
+                    <Link href={`/strategi/edit/${item.id}`} className="btn btn-warning btn-sm">
+                      Edit
+                    </Link>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
